@@ -1,0 +1,10 @@
+% Application       : C++ demo
+
+% TASK NAME  PRIO ENTRY STACK GROUPS
+% ==================================
+%  TASK TASKA    7 task_a  2048 [EXE]
+  TASK TASKA    7 main  2048 [EXE]
+  TASK TASKB    8 usbSerialTask  1024 [EXE]
+  TASK TASKC    8 baudrateReset  256 [EXE]
+  TASK TASKD    8 arduinoQuarkSketch  2048 [EXE]
+
