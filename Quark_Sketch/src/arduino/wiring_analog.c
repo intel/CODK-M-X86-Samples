@@ -33,39 +33,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <pwm.h>
 #include <device.h>
 #include <misc/byteorder.h>
-#include <adc.h>
 
 #include <pinmux.h>
-
-#define ADC_DEVICE_NAME "ADC_0"
-#define CHANNEL 10
-#define BUFFER_SIZE 40
 
 #define SLEEPTIME  2
 #define SLEEPTICKS (SLEEPTIME * sys_clock_ticks_per_sec)
 
-static uint8_t seq_buffer[BUFFER_SIZE];
-
-static struct adc_seq_entry sample = {
-	.sampling_delay = 12,
-	.channel_id = CHANNEL,
-	.buffer = seq_buffer,
-	.buffer_length = BUFFER_SIZE,
-};
-
-static struct adc_seq_table table = {
-	.entries = &sample,
-	.num_entries = 1,
-};
-
-static void _print_sample_in_hex(uint8_t *buf, uint32_t length)
-{
-	PRINT("Buffer content:\n");
-	for (; length > 0; length -= 4, buf += 4) {
-		PRINT("0x%x ", *((uint32_t *)buf));
-	}
-	PRINT("\n");
-}
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,7 +49,6 @@ static int _writeResolution = 8;
 static int _readResolution = 10;
 
 struct device *pwm_dev;
-struct device *adc;
 
 #define PWM_PERIOD 32653	//490 Hz
 
@@ -84,7 +56,6 @@ struct device *adc;
 void analogInit()
 {
 	pwm_dev = device_get_binding("PWM_0");
-	adc = device_get_binding(ADC_DEVICE_NAME);
 }
 
 void analogWriteResolution(int res)

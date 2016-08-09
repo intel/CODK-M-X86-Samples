@@ -46,8 +46,6 @@
 #define RSTC_WARM_RESET	(1 << 1)
 #define RSTC_COLD_RESET (1 << 3)
 
-#define SOFTRESET_INTERRUPT_PIN		0
-
 static volatile bool data_transmitted;
 static volatile bool data_arrived = false;
 
@@ -71,14 +69,20 @@ struct gpio_callback cb;
 #define Tx_TAIL curie_shared_data->cdc_acm_shared_tx_buffer.tail
 #define SBS     SERIAL_BUFFER_SIZE
 
+#define RESET_BAUD 1200
+#define BAUDRATE_RESET_SLEEP 100
+
 /* Make sure BUFFER_LENGTH is not bigger then shared ring buffers */
 #define BUFFER_LENGTH		128
 
-#define LOOP_INTERVAL_MS 1
-#define USB_ACM_TIMEOUT_MS (250)
-
 #define USB_CONNECTED	    0x04
 #define USB_DISCONNECTED    0x05
+
+#define SOFTRESET_INTERRUPT_PIN		0
+
+#define ARCSTART_DELAY_CYCLES		6400000
+#define SERIAL_READ_TIMEOUT		1000
+
 
 // buffers
 static unsigned char data_buf[128];
@@ -125,14 +129,10 @@ static void interrupt_handler(struct device *dev)
 
 static void read_data(struct device *dev, int *bytes_read)
 {
-	int timeout = 1000;
+	int timeout = SERIAL_READ_TIMEOUT;
 
-	while (data_arrived == false)
-	{
-		if(!timeout)
-			break;
-		timeout--;
-	}
+	while (!data_arrived && !timeout)
+		--timeout;
 
 	data_arrived = false;
 
@@ -194,7 +194,15 @@ void main(void)
 	uint32_t *reset_vector;
 	reset_vector = (uint32_t *)RESET_VECTOR;
 	start_arc(*reset_vector);
+	task_start(QUARK_SKETCH);
+	task_start(CDCACM_SETUP);
+	task_start(BAUDRATE_RESET);
+	task_start(USB_SERIAL);
+}
 
+extern "C" void cdcacm_setup(void)
+{
+	PRINT("cdcacm_setup task\r\n");
 	uint32_t baudrate, dtr = 0;
 	int ret;
 
@@ -206,6 +214,7 @@ void main(void)
 		uart_line_ctrl_get(dev, LINE_CTRL_DTR, &dtr);
 		if (dtr)
 			break;
+		task_yield();
 	}
 	
 	PRINT("DTR set, start test\n");
@@ -233,36 +242,44 @@ void main(void)
 		PRINT("Baudrate detected: %d\n", baudrate);
 
 	uart_irq_callback_set(dev, interrupt_handler);
-	usbSetupDone = true;
-	
+		
 	//reset head and tails values to 0
 	curie_shared_data->cdc_acm_shared_rx_buffer.head = 0;
 	curie_shared_data->cdc_acm_shared_rx_buffer.tail = 0;
 	curie_shared_data->cdc_acm_shared_tx_buffer.head = 0;
 	curie_shared_data->cdc_acm_shared_tx_buffer.tail = 0;
+	usbSetupDone = true;
 }
 
-extern "C" void baudrateReset(void)
+extern "C" void baudrate_reset(void)
 {
-	PRINT("baudrateReset task\r\n");
+	PRINT("baudrate_reset task\r\n");
 	uint32_t baudrate, ret = 0;
-	while(!usbSetupDone);
+	while(!usbSetupDone)
+	{
+		task_yield();
+	}
+
 	ret = uart_line_ctrl_get(dev, LINE_CTRL_BAUD_RATE, &baudrate);	
 	
 	while(1)
 	{
 		ret = uart_line_ctrl_get(dev, LINE_CTRL_BAUD_RATE, &baudrate);
-		if(baudrate == 1200)
+		if(baudrate == RESET_BAUD)
 		{
 			reboot();
 		}
-		task_sleep(100);
+		task_sleep(BAUDRATE_RESET_SLEEP);
 	}
 }
 
-extern "C" void usbSerialTask(void)
+extern "C" void usb_serial(void)
 {
-	while(!usbSetupDone);
+	PRINT("usb_serial task\r\n");
+	while(!usbSetupDone)
+	{
+		task_yield();
+	}
 
 	/* Enable rx interrupts */
 	uart_irq_rx_enable(dev);
@@ -275,10 +292,10 @@ extern "C" void usbSerialTask(void)
 	
 }
 
-extern "C" void arduinoQuarkSketch(void)
+extern "C" void quark_sketch(void)
 {
 	//setup
-	int pin = 12;
+	int pin = 13;
 	pinMode(pin, OUTPUT);
 
 	//loop
@@ -286,6 +303,7 @@ extern "C" void arduinoQuarkSketch(void)
 	{
 		while(1)
 		{
+			pinMode(pin, OUTPUT);
 			digitalWrite(pin, HIGH);
 			delay(1000);
 			digitalWrite(pin, LOW);
