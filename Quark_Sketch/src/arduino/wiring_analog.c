@@ -75,7 +75,6 @@ static inline uint32_t mapResolution(uint32_t value, uint32_t from, uint32_t to)
 
 void analogWrite(uint8_t pin, int val)
 {
-	PRINT("Analog Write\r\n");
 	pinMode(pin, OUTPUT);
 
 	int highPeriod = (val/255.0) * PWM_PERIOD*2;

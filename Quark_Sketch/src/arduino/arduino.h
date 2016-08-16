@@ -8,6 +8,7 @@
 #include "wiring_analog.h"
 #include "WInterrupts.h"
 #include "wiring.h"
+#include "serial_print.h"
 
 #define HIGH 0x1
 #define LOW  0x0
