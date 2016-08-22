@@ -10,8 +10,11 @@
 #include "wiring.h"
 #include "serial_print.h"
 
-#define HIGH 0x1
-#define LOW  0x0
+#define LOW  0x00
+#define HIGH 0x01
+#define CHANGE 0x02
+#define FALLING 0x03
+#define RISING 0x04
 
 #define INPUT 0x0
 #define OUTPUT 0x01
