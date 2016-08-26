@@ -9,6 +9,7 @@
 #include "WInterrupts.h"
 #include "wiring.h"
 #include "serial_print.h"
+#include "wiring_spi.h"
 
 #define LOW  0x00
 #define HIGH 0x01
