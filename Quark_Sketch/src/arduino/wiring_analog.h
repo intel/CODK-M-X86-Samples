@@ -34,6 +34,8 @@ extern void analogWrite( uint8_t pin, int val ) ;
 
 extern void analogWriteResolution(int res);
 
+extern void analogWriteFrequency(int pin, uint32_t frequency);
+
 #ifdef __cplusplus
 }
 #endif

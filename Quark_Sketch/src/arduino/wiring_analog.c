@@ -36,9 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <pinmux.h>
 
-#define SLEEPTIME  2
-#define SLEEPTICKS (SLEEPTIME * sys_clock_ticks_per_sec)
-
+#define PWM_PERIOD 	65306	//490 Hz
+#define F_CPU 		32000000
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,16 +45,20 @@ extern "C" {
 
 /* Standard Arduino PWM resolution */
 static int _writeResolution = 8;
-static int _readResolution = 10;
+
+int pwm_period[4];
 
 struct device *pwm_dev;
-
-#define PWM_PERIOD 32653	//490 Hz
-
 
 void analogInit()
 {
 	pwm_dev = device_get_binding("PWM_0");
+	
+	pwm_period[0] = PWM_PERIOD;
+	pwm_period[1] = PWM_PERIOD/2;
+	pwm_period[2] = PWM_PERIOD/2;
+	pwm_period[3] = PWM_PERIOD;
+	
 }
 
 void analogWriteResolution(int res)
@@ -77,11 +80,17 @@ void analogWrite(uint8_t pin, int val)
 {
 	pinMode(pin, OUTPUT);
 
-	int highPeriod = (val/255.0) * PWM_PERIOD*2;
-	int lowPeriod = PWM_PERIOD*2 - highPeriod;
+	int highPeriod = (val/255.0) * pwm_period[zephyrDescription[pin].pwmChannel];
+	int lowPeriod = pwm_period[zephyrDescription[pin].pwmChannel] - highPeriod;
 	pwm_pin_set_values(pwm_dev, zephyrDescription[pin].pwmChannel, highPeriod, lowPeriod);
 }
 
+void analogWriteFrequency(int pin, uint32_t frequency)
+{
+	uint32_t period = F_CPU / frequency;
+	pwm_period[zephyrDescription[pin].pwmChannel] = period;
+	
+}
 
 #ifdef __cplusplus
 }
