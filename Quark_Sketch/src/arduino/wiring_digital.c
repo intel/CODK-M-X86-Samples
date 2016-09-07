@@ -7,7 +7,6 @@
 
 #include <device.h>
 #include <gpio.h>
-#include <sys_clock.h>
 #include <misc/util.h>
 
 #include <pinmux.h>

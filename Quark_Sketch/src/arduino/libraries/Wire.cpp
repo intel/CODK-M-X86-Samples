@@ -27,7 +27,6 @@
 #include <i2c.h>
 
 #include "Wire.h"
-#include "../arduino.h"
 
 #include <pinmux.h>
 #include <sys_io.h>
