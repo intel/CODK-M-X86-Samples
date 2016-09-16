@@ -33,10 +33,10 @@ void loop( void );
 
 typedef struct _ZephyrPinDescription
 {
-	uint8_t arduinoPin;
 	uint8_t zephyrPin1;
 	uint8_t zephyrPin2;
-	uint8_t analogPinNumber;
+	uint8_t pinMux;
+	uint8_t muxMode;
 	uint8_t pwmChannel;
 	uint8_t pinMode;
 	uint8_t fabric;

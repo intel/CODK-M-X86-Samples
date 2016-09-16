@@ -37,19 +37,18 @@ struct device *gpio_dev;
 void digitalInit()
 {
 	gpio_dev= device_get_binding(GPIO_DRV_NAME);
-
-	for(int i = 0; i < NUM_DIGITAL_PINS; i++)
-	{
-		gpio_pin_configure(gpio_dev, zephyrDescription[i].zephyrPin1, (GPIO_DIR_IN));
-		if(zephyrDescription[i].zephyrPin2 != INVALID)
-		{
-			gpio_pin_configure(gpio_dev, zephyrDescription[i].zephyrPin2, (GPIO_DIR_IN));
-		}
-	}	
 }
 
 void pinMode(uint8_t pin, uint8_t mode)
 {
+	struct device *p_mux = device_get_binding((char*)"PINMUX_DEV");
+	pinmux_pin_set(p_mux, zephyrDescription[pin].pinMux, zephyrDescription[pin].muxMode); //set to default gpio mux mode
+
+	if(zephyrDescription[pin].zephyrPin2 != INVALID) 
+	{
+		gpio_pin_configure(gpio_dev, zephyrDescription[pin].zephyrPin2, (GPIO_DIR_IN)); //HIGH-Z
+	}
+
 	if(mode == OUTPUT)
 	{
 		gpio_pin_configure(gpio_dev, zephyrDescription[pin].zephyrPin1, (GPIO_DIR_OUT));

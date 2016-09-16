@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <pinmux.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

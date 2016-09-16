@@ -18,35 +18,43 @@ extern "C" {
 ZephyrPinDescription zephyrDescription[]=
 {
 
-//	arduinoPin, zephyrPin1, zephyrPin2, analogPinNumber, pwmChannel, pinMode, fabric
-	{0,	INVALID, INVALID, INVALID, INVALID, INPUT, SS_GPIO},
-	{1, 	INVALID, INVALID, INVALID, INVALID, INPUT, SS_GPIO},
-	{2,	18, INVALID, INVALID, INVALID, INPUT, SOC_GPIO},
-	{3,	17, 63, INVALID, 0, INPUT, SOC_GPIO},
-	{4,	19, INVALID, INVALID, INVALID, INPUT, SOC_GPIO},
-	{5,	15, 64, INVALID, 1, INPUT, SOC_GPIO},
-	{6,	INVALID, 65, INVALID, 2, INPUT, SS_GPIO},
-	{7,	20, INVALID, INVALID, INVALID, INPUT, SOC_GPIO},
-	{8,	16, INVALID, INVALID, INVALID, INPUT, SOC_GPIO},
-	{9,	INVALID, 66, INVALID, 3, INPUT, SS_GPIO},
-	{10,	11, 0, INVALID, INVALID, INPUT, SOC_GPIO},
-	{11,	10, 3, INVALID, INVALID, INPUT, SOC_GPIO},
-	{12,	9, 1, INVALID, INVALID, INPUT, SOC_GPIO},
-	{13,	8, 2, INVALID, INVALID, INPUT, SOC_GPIO},
-	{14,	INVALID, INVALID, 10, INVALID, INPUT, SS_GPIO},
-	{15,	INVALID, INVALID, 11, INVALID, INPUT, SS_GPIO},
-	{16,	INVALID, INVALID, 13, INVALID, INPUT, SS_GPIO},
-	{17,	INVALID, INVALID, 14, INVALID, INPUT, SS_GPIO},
-	{18,	INVALID, INVALID, 14, INVALID, INPUT, SS_GPIO},
-	{19,	INVALID, INVALID, 9, INVALID, INPUT, SS_GPIO},
-	{20,	INVALID, INVALID, INVALID, INVALID, INPUT, SS_GPIO},
-	{21,	24, INVALID, INVALID, INVALID, INPUT, SOC_GPIO},
+//	zephyrPin1, zephyrPin2, pinMux, muxMode,	pwmChannel, pinMode, fabric
+	{9,	    INVALID,	17,	PINMUX_FUNC_C,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO0
+	{8,	    INVALID, 	16, 	PINMUX_FUNC_C,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO1
+	{18,	    INVALID, 	52, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO2
+	{17,	    INVALID, 	63, 	PWM_MUX_MODE,	0, 	    INPUT,   SOC_GPIO}, // Arduino IO3
+	{19, 	    INVALID, 	53, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO4
+	{15, 	    INVALID, 	64, 	PWM_MUX_MODE,	1, 	    INPUT,   SOC_GPIO}, // Arduino IO5
+	{12, 	    INVALID, 	65, 	PWM_MUX_MODE,	2, 	    INPUT,   SS_GPIO}, // Arduino IO6
+	{20, 	    INVALID, 	54, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO7
+	{16, 	    INVALID, 	50, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO8
+	{13, 	    66, 	66, 	PWM_MUX_MODE,	3, 	    INPUT,   SS_GPIO}, // Arduino IO9
+	{11, 	    0, 		45, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO10
+	{10, 	    3, 		44, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO11
+	{9, 	    1, 		43, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO12
+	{8, 	    2, 		42, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO13
+	{2, 	    INVALID, 	10, 	INVALID,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO14
+	{3, 	    INVALID, 	11, 	INVALID,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO15
+	{4, 	    INVALID, 	12, 	INVALID,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO16
+	{5, 	    INVALID, 	13, 	INVALID,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO17
+	{6, 	    INVALID, 	14, 	I2C_MUX_MODE,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO18
+	{1, 	    INVALID, 	9, 	I2C_MUX_MODE,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO19
+	{0, 	    INVALID, 	8, 	INVALID,	INVALID,    INPUT,   SS_GPIO}, // Arduino IO20
+	{24, 	    INVALID, 	58, 	GPIO_MUX_MODE,	INVALID,    INPUT,   SOC_GPIO}, // Arduino IO21
 };
 
 void variantInit()
 {
 	analogInit();
 	digitalInit();
+	struct device *p_mux = device_get_binding((char*)"PINMUX_DEV");
+	for(int i = 0; i < NUM_DIGITAL_PINS; i++)
+	{
+		if(zephyrDescription[i].muxMode != INVALID)
+		{
+			pinmux_pin_set(p_mux, zephyrDescription[i].pinMux, zephyrDescription[i].muxMode);
+		}
+	}
 }
 
 
