@@ -1,24 +1,17 @@
 /*
- * TwoWire.h - TWI/I2C library for Linux Userspace
- * Copyright (c) 2013 Parav https://github.com/meanbot.
- * All rights reserved.
+ * Copyright (c) 2016 Intel Corporation
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Modifications to support the Curie ODK
- * Copyright (C) 2016 Intel Corporation
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include <zephyr.h>
@@ -91,8 +84,6 @@ void TwoWire::setClock(int speed)
 	if (i2c_configure(i2c_dev, cfg.raw) != 0) {
 		PRINT("Error on i2c_configure()\n");
 	}
-
-
 }
 
 void TwoWire::beginTransmission(uint8_t address)
@@ -109,20 +100,6 @@ void TwoWire::beginTransmission(int address)
 {
 	beginTransmission((uint8_t) address);
 }
-
-//
-//	Originally, 'endTransmission' was an f(void) function.
-//	It has been modified to take one parameter indicating
-//	whether or not a STOP should be performed on the bus.
-//	Calling endTransmission(false) allows a sketch to
-//	perform a repeated start.
-//
-//	WARNING: Nothing in the library keeps track of whether
-//	the bus tenure has been properly ended with a STOP. It
-//	is very possible to leave the bus in a hung state if
-//	no call to endTransmission(true) is made. Some I2C
-//	devices will behave oddly if they do not see a STOP.
-//
 
 uint8_t TwoWire::endTransmission(uint8_t sendStop)
 {
@@ -144,9 +121,6 @@ uint8_t TwoWire::endTransmission(uint8_t sendStop)
 	return 0; // success
 }
 
-//	This provides backwards compatibility with the original
-//	definition, and expected behaviour, of endTransmission
-//
 uint8_t TwoWire::endTransmission(void)
 {
 	return endTransmission(true);
@@ -236,20 +210,44 @@ void TwoWire::i2c_setslave(uint8_t addr)
 
 int TwoWire::i2c_writebytes(uint8_t *bytes, uint8_t length, bool no_stop)
 {
-	if (i2c_write(i2c_dev, bytes, length, txAddress) != 0) {
-		PRINT("Error on i2c_write()\n");
-		return -1;
+	struct i2c_msg msgs[1];
+
+	int flags = 0;
+	if(!no_stop)
+	{
+		flags = I2C_MSG_WRITE | I2C_MSG_STOP;
 	}
-	return 1;
+	else
+	{
+		flags = I2C_MSG_WRITE;
+	}	
+
+	msgs[0].buf = bytes;
+	msgs[0].len = length;
+	msgs[0].flags = flags;
+	
+	return i2c_transfer(i2c_dev, &msgs[0], 1, txAddress);
 }
 
 int TwoWire::i2c_readbytes(uint8_t *buf, int length, bool no_stop)
 {
-	if (i2c_read(i2c_dev, buf, length, txAddress) != 0) {
-		PRINT("Error on i2c_read()\n");
-		return -1;
+	struct i2c_msg msgs[1];
+
+	int flags = 0;
+	if(!no_stop)
+	{
+		flags = I2C_MSG_READ | I2C_MSG_STOP;
 	}
-	return 1;
+	else
+	{
+		flags = I2C_MSG_READ;
+	}
+
+	msgs[0].buf = buf;
+	msgs[0].len = length;
+	msgs[0].flags = flags;
+
+	return i2c_transfer(i2c_dev, &msgs[0], 1, txAddress);
 }
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
