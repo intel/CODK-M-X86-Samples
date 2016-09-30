@@ -80,6 +80,7 @@ void quark_sketch(void)
     while (1) {
         task_sleep(SLEEP_TIME);
         ipm_send(ipm, 1, 0, data, 16);
+        task_yield();
     }
 }
 

@@ -97,6 +97,8 @@ void quark_sketch(void)
             received = false;
             ipm_send(ipm, 1, 0, (uint32_t *)&val, sizeof(uint32_t));
         }
+
+        task_yield();
     }
 }
 
