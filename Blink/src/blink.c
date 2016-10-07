@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-
 #include <zephyr.h>
-#include <ipm.h>
-#include <ipm/ipm_quark_se.h>
 #include "arduino101_services/arduino101_services.h"
-
-#define SLEEP_TIME 100
-
-/* Sending messages on channel 0 */
-QUARK_SE_IPM_DEFINE(ipm_send, 0, QUARK_SE_IPM_OUTBOUND);
-
-const char data[] = "Hello from x86";
+#include "arduino/arduino.h"
 
 void main (void)
 {
-    struct device *ipm = device_get_binding("ipm_send");
+	//setup
+	int pin = 13;
+	pinMode(pin, OUTPUT);
 
-    while (1) {
-        task_sleep(SLEEP_TIME);
-        ipm_send(ipm, 1, 0, data, 16);
-        task_yield();
-    }
+	//loop
+	while(1) {
+		pinMode(pin, OUTPUT);
+		digitalWrite(pin, HIGH);
+		delay(500);
+		digitalWrite(pin, LOW);
+		delay(500);
+		task_yield();
+	}
 }
