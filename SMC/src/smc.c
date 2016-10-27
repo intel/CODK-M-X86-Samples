@@ -16,7 +16,7 @@
 
 #include <zephyr.h>
 #include "arduino/arduino.h"
-#include "arduino101_services/arduino101_services.h"
+#include "arduino101_services/sharedmemory_com.h"
 
 void main (void)
 {
