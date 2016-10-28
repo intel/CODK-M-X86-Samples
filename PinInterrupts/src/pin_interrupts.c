@@ -22,6 +22,9 @@ void togglePin();
 
 void main (void)
 {
+    // Required for Arduino-like functionality on x86
+    variantInit();
+
 	//setup
 	pinMode(12, INPUT);
 	attachInterrupt(12, togglePin, FALLING);

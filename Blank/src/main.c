@@ -28,6 +28,9 @@
 
 void main (void)
 {
+    // Required for Arduino-like functionality on x86
+    variantInit();
+
 	//setup
 
 	//loop

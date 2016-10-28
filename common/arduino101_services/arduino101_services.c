@@ -16,7 +16,6 @@
 
 
 #include <zephyr.h>
-#include "arduino/arduino.h"
 #include "arduino101_services.h"
 
 #define SOFTRESET_INTERRUPT_PIN		0
@@ -53,7 +52,6 @@ void arduino101_services (void)
 	init_cdc_acm();
 	softResetButton();
 	init_sharedMemory_com();
-    variantInit();
 
 	// start ARC core
 	uint32_t *reset_vector;

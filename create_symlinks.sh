@@ -31,4 +31,3 @@ do
 done
 
 ln -s "$services_path" "$arduino_path"
-ln -s "$arduino_path" "$services_path"
