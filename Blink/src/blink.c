@@ -20,6 +20,9 @@
 
 void main (void)
 {
+    // Required for Arduino-like functionality on x86
+    variantInit();
+
 	//setup
 	int pin = 13;
 	pinMode(pin, OUTPUT);

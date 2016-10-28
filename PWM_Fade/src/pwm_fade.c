@@ -22,6 +22,9 @@ void main (void)
 {
 	//based on the Fade.ino example from Arduino
 
+    // Required for Arduino-like functionality on x86
+    variantInit();
+
 	//setup
 	int led = 6;           // the PWM pin the LED is attached to
 	int brightness = 0;    // how bright the LED is
