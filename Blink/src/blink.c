@@ -15,7 +15,6 @@
  */
 
 #include <zephyr.h>
-#include "arduino101_services/arduino101_services.h"
 #include "arduino/arduino.h"
 
 void main (void)
