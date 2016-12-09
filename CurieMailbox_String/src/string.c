@@ -22,18 +22,46 @@
 
 #define SLEEP_TIME 100
 
-/* Sending messages on channel 0 */
-QUARK_SE_IPM_DEFINE(ipm_send, 0, QUARK_SE_IPM_OUTBOUND);
+/* Sending messages on all 8 channels */
+QUARK_SE_IPM_DEFINE(ipm0, 0, QUARK_SE_IPM_OUTBOUND);
+QUARK_SE_IPM_DEFINE(ipm1, 1, QUARK_SE_IPM_OUTBOUND);
+QUARK_SE_IPM_DEFINE(ipm2, 2, QUARK_SE_IPM_OUTBOUND);
+QUARK_SE_IPM_DEFINE(ipm3, 3, QUARK_SE_IPM_OUTBOUND);
+QUARK_SE_IPM_DEFINE(ipm4, 4, QUARK_SE_IPM_OUTBOUND);
+QUARK_SE_IPM_DEFINE(ipm5, 5, QUARK_SE_IPM_OUTBOUND);
+QUARK_SE_IPM_DEFINE(ipm6, 6, QUARK_SE_IPM_OUTBOUND);
+QUARK_SE_IPM_DEFINE(ipm7, 7, QUARK_SE_IPM_OUTBOUND);
 
-const char data[] = "Hello from x86";
+const char data0[] = "Mailbox";
+const char data1[] = "greetings";
+const char data2[] = "from";
+const char data3[] = "the";
+const char data4[] = "Arduino";
+const char data5[] = "101";
+const char data6[] = "x86";
+const char data7[] = "core!\n";
 
 void main (void)
 {
-    struct device *ipm = device_get_binding("ipm_send");
+    struct device *ipm0 = device_get_binding("ipm0");
+    struct device *ipm1 = device_get_binding("ipm1");
+    struct device *ipm2 = device_get_binding("ipm2");
+    struct device *ipm3 = device_get_binding("ipm3");
+    struct device *ipm4 = device_get_binding("ipm4");
+    struct device *ipm5 = device_get_binding("ipm5");
+    struct device *ipm6 = device_get_binding("ipm6");
+    struct device *ipm7 = device_get_binding("ipm7");
 
     while (1) {
         task_sleep(SLEEP_TIME);
-        ipm_send(ipm, 1, 0, data, 16);
+        ipm_send(ipm0, 1, 0, data0, 8);
+        ipm_send(ipm1, 1, 0, data1, 9);
+        ipm_send(ipm2, 1, 0, data2, 5);
+        ipm_send(ipm3, 1, 0, data3, 4);
+        ipm_send(ipm4, 1, 0, data4, 8);
+        ipm_send(ipm5, 1, 0, data5, 4);
+        ipm_send(ipm6, 1, 0, data6, 4);
+        ipm_send(ipm7, 1, 0, data7, 7);
         task_yield();
     }
 }
