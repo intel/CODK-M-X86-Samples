@@ -41,7 +41,7 @@ const char data5[] = "101";
 const char data6[] = "x86";
 const char data7[] = "core!\n";
 
-void main (void)
+void sketch (void *dummy1, void *dummy2, void *dummy3)
 {
     struct device *ipm0 = device_get_binding("ipm0");
     struct device *ipm1 = device_get_binding("ipm1");
@@ -53,7 +53,7 @@ void main (void)
     struct device *ipm7 = device_get_binding("ipm7");
 
     while (1) {
-        task_sleep(SLEEP_TIME);
+        k_sleep(SLEEP_TIME);
         ipm_send(ipm0, 1, 0, data0, 8);
         ipm_send(ipm1, 1, 0, data1, 9);
         ipm_send(ipm2, 1, 0, data2, 5);
@@ -62,6 +62,6 @@ void main (void)
         ipm_send(ipm5, 1, 0, data5, 4);
         ipm_send(ipm6, 1, 0, data6, 4);
         ipm_send(ipm7, 1, 0, data7, 7);
-        task_yield();
+        k_yield();
     }
 }

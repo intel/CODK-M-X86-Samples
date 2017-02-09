@@ -18,20 +18,22 @@
 #include "arduino/arduino.h"
 #include "arduino101_services/arduino101_services.h"
 
-void main (void)
+void sketch (void *dummy1, void *dummy2, void *dummy3)
 {
     // Required for Arduino-like functionality on x86
     variantInit();
 
 	//setup
+	int pin = 13;
+	pinMode(pin, OUTPUT);
 
 	//loop
-	while(1)
-	{
-		for(int i = 0; i < smc_availableForRead(); i++)
-		{
-			smc_write(smc_read() * 2);
-		}
-		task_yield();
+	while(1) {
+		pinMode(pin, OUTPUT);
+		digitalWrite(pin, HIGH);
+		delay(500);
+		digitalWrite(pin, LOW);
+		delay(500);
+		k_yield();
 	}
 }
