@@ -18,34 +18,26 @@
 #include "arduino/arduino.h"
 #include "arduino101_services/arduino101_services.h"
 
-void main (void)
-{
-	//based on the Fade.ino example from Arduino
+void togglePin();
 
+void sketch (void *dummy1, void *dummy2, void *dummy3)
+{
     // Required for Arduino-like functionality on x86
     variantInit();
 
 	//setup
-	int led = 6;           // the PWM pin the LED is attached to
-	int brightness = 0;    // how bright the LED is
-	int fadeAmount = 5;    // how many points to fade the LED by
-
-	analogWriteFrequency(led, 20000); //set frequency to 20 KHz
-
+	pinMode(12, INPUT);
+	attachInterrupt(12, togglePin, FALLING);
 	//loop
 	while(1)
 	{
-		analogWrite(led, brightness);
-
-		// change the brightness for next time through the loop:
-		brightness = brightness + fadeAmount;
-
-		// reverse the direction of the fading at the ends of the fade:
-		if (brightness <= 0 || brightness >= 255) {
-		  fadeAmount = -fadeAmount;
-		}
-		// wait for 30 milliseconds to see the dimming effect
-		delay(30);
-		task_yield();
+		k_yield();
 	}
+}
+
+void togglePin()
+{
+	pinMode(13,OUTPUT);
+	digitalWrite(13, HIGH);
+	digitalWrite(13, LOW);
 }

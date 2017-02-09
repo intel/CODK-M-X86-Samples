@@ -18,39 +18,27 @@
 #include <zephyr.h>
 #include "arduino101_services.h"
 
-#define SOFTRESET_INTERRUPT_PIN		0
 
-struct gpio_callback cb;
+/* size of stack area used by each thread */
+#define MAIN_STACKSIZE      1024
+#define SKETCH_STACKSIZE    2048
+#define CDCACM_STACKSIZE    256
+#define RESET_STACKSIZE     128
+#define USBSERIAL_STACKSIZE 256
 
-static void softReset_button_callback(struct device *port, struct gpio_callback *cb, uint32_t pins)
-{
-	soft_reboot();
-}
 
-static void softResetButton()
-{
-	struct device *aon_gpio;
-	char* gpio_aon_0 = (char*)"GPIO_AON_0";
-	aon_gpio = device_get_binding(gpio_aon_0);
-	if (!aon_gpio) 
-	{
-		return;
-	}
+/* scheduling priority used by each thread */
+#define PRIORITY 7
+#define TASK_PRIORITY 8
 
-	gpio_init_callback(&cb, softReset_button_callback, BIT(SOFTRESET_INTERRUPT_PIN));
-	gpio_add_callback(aon_gpio, &cb);
+char __noinit __stack sketch_stack_area[SKETCH_STACKSIZE];
+char __noinit __stack cdcacm_setup_stack_area[CDCACM_STACKSIZE];
+char __noinit __stack baudrate_reset_stack_area[RESET_STACKSIZE];
+char __noinit __stack usb_serial_stack_area[USBSERIAL_STACKSIZE];
 
-	gpio_pin_configure(aon_gpio, SOFTRESET_INTERRUPT_PIN,
-			   GPIO_DIR_IN | GPIO_INT | GPIO_INT_EDGE |
-			   GPIO_INT_ACTIVE_LOW | GPIO_INT_DEBOUNCE);
-
-	gpio_pin_enable_callback(aon_gpio, SOFTRESET_INTERRUPT_PIN);
-}
-
-void arduino101_services (void)
+void threadMain(void *dummy1, void *dummy2, void *dummy3)
 {
 	init_cdc_acm();
-	softResetButton();
 	init_sharedMemory_com();
 
 	// start ARC core
@@ -58,8 +46,18 @@ void arduino101_services (void)
 	reset_vector = (uint32_t *)RESET_VECTOR;
 	start_arc(*reset_vector);
 	
-	task_start(MAIN);
-	task_start(CDCACM_SETUP);
-	task_start(BAUDRATE_RESET);
-	task_start(USB_SERIAL);
+
+	k_thread_spawn(sketch_stack_area, 2048, sketch, NULL, NULL,
+			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
+
+	k_thread_spawn(cdcacm_setup_stack_area, CDCACM_STACKSIZE, cdcacm_setup, NULL, NULL,
+			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
+	k_thread_spawn(baudrate_reset_stack_area, RESET_STACKSIZE, baudrate_reset, NULL, NULL,
+			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
+	k_thread_spawn(usb_serial_stack_area, USBSERIAL_STACKSIZE, usb_serial, NULL, NULL,
+			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
 }
+
+K_THREAD_DEFINE(threadMain_id, MAIN_STACKSIZE, threadMain, NULL, NULL, NULL,
+		PRIORITY, 0, K_NO_WAIT);
+

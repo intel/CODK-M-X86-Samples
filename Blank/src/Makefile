@@ -1,3 +1,2 @@
-obj-y += arduino101_services/
-obj-y += arduino/
-obj-y += main.o
+obj-y += sketch.o arduino/ arduino101_services/
+

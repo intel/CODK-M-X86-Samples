@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-#if defined(CONFIG_STDOUT_CONSOLE)
-#include <stdio.h>
-#define PRINT           printf
-#else
-#include <misc/printk.h>
-#define PRINT           printk
-#endif
-
 #include <zephyr.h>
 #include "arduino/arduino.h"
 #include "arduino101_services/arduino101_services.h"
 
-void main (void)
+void sketch (void *dummy1, void *dummy2, void *dummy3)
 {
     // Required for Arduino-like functionality on x86
     variantInit();
@@ -36,6 +28,10 @@ void main (void)
 	//loop
 	while(1)
 	{
-		task_yield();
+		for(int i = 0; i < smc_availableForRead(); i++)
+		{
+			smc_write(smc_read() * 2);
+		}
+		k_yield();
 	}
 }
