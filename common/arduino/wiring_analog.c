@@ -80,11 +80,9 @@ void analogWrite(uint8_t pin, int val)
 {
 	pinMode(pin, OUTPUT);
 
-	pwm_pin_set_period(pwm_dev, zephyrDescription[pin].pwmChannel, 
-		pwm_period[zephyrDescription[pin].pwmChannel]);
-	pwm_pin_set_values(pwm_dev, zephyrDescription[pin].pwmChannel, 0,
-		(int)((pwm_period[zephyrDescription[pin].pwmChannel]* HW_CLOCK_CYCLES_PER_USEC) 
-		* (val/(float)maxResolutionValue)));
+	pwm_pin_set_usec(pwm_dev, zephyrDescription[pin].pwmChannel,
+		pwm_period[zephyrDescription[pin].pwmChannel],
+		(pwm_period[zephyrDescription[pin].pwmChannel]*val/255));
 }
 
 void analogWriteFrequency(int pin, uint32_t frequency)
