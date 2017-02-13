@@ -29,11 +29,11 @@
 
 void delay(uint32_t msecs)
 {
-	task_sleep(MSEC(msecs));
+	k_sleep(msecs);
 }
 
 void delayMicroseconds(uint32_t msecs)
 {
-	task_sleep(USEC(msecs));
+	k_sleep(msecs);
 }
 
