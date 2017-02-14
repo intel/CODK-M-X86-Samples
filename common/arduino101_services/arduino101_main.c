@@ -16,15 +16,15 @@
 
 
 #include <zephyr.h>
-#include "arduino101_services.h"
+#include "arduino101_main.h"
 
 
 /* size of stack area used by each thread */
-#define MAIN_STACKSIZE      1024
+#define MAIN_STACKSIZE      2048
 #define SKETCH_STACKSIZE    2048
-#define CDCACM_STACKSIZE    256
-#define RESET_STACKSIZE     128
-#define USBSERIAL_STACKSIZE 256
+#define CDCACM_STACKSIZE    384
+#define RESET_STACKSIZE     384
+#define USBSERIAL_STACKSIZE 384
 
 
 /* scheduling priority used by each thread */
@@ -46,16 +46,19 @@ void threadMain(void *dummy1, void *dummy2, void *dummy3)
 	reset_vector = (uint32_t *)RESET_VECTOR;
 	start_arc(*reset_vector);
 	
-
-	k_thread_spawn(sketch_stack_area, 2048, sketch, NULL, NULL,
+	
+	k_thread_spawn(sketch_stack_area, SKETCH_STACKSIZE, sketch, NULL, NULL,
 			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
-
+	
 	k_thread_spawn(cdcacm_setup_stack_area, CDCACM_STACKSIZE, cdcacm_setup, NULL, NULL,
 			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
+	
 	k_thread_spawn(baudrate_reset_stack_area, RESET_STACKSIZE, baudrate_reset, NULL, NULL,
 			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
+	
 	k_thread_spawn(usb_serial_stack_area, USBSERIAL_STACKSIZE, usb_serial, NULL, NULL,
 			NULL, TASK_PRIORITY, 0, K_NO_WAIT);
+	
 }
 
 K_THREAD_DEFINE(threadMain_id, MAIN_STACKSIZE, threadMain, NULL, NULL, NULL,

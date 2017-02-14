@@ -16,13 +16,13 @@
 
 #include <zephyr.h>
 #include "arduino/arduino.h"
-#include "arduino101_services/arduino101_services.h"
 
+//based on the Fade.ino example from Arduino.cc
 void sketch (void *dummy1, void *dummy2, void *dummy3)
 {
-	//based on the Fade.ino example from Arduino
+    
 
-    // Required for Arduino-like functionality on x86
+    // Required for Arduino-like APIs on x86
     variantInit();
 
 	//setup

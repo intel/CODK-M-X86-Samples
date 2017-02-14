@@ -17,26 +17,16 @@
 #include <zephyr.h>
 #include "arduino/arduino.h"
 
-void togglePin();
-
 void sketch (void *dummy1, void *dummy2, void *dummy3)
 {
-    // Required for Arduino-like functionality on x86
+    // Required for Arduino-like APIs on x86
     variantInit();
 
 	//setup
-	pinMode(12, INPUT);
-	attachInterrupt(12, togglePin, FALLING);
+
 	//loop
-	while(1)
-	{
+	while(1) {
+
 		k_yield();
 	}
-}
-
-void togglePin()
-{
-	pinMode(13,OUTPUT);
-	digitalWrite(13, HIGH);
-	digitalWrite(13, LOW);
 }
