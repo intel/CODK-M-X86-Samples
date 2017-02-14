@@ -16,11 +16,10 @@
 
 #include <zephyr.h>
 #include "arduino/arduino.h"
-#include "arduino101_services/arduino101_services.h"
 
 void sketch (void *dummy1, void *dummy2, void *dummy3)
 {
-    // Required for Arduino-like functionality on x86
+    // Required for Arduino-like APIs on x86
     variantInit();
 
 	//setup

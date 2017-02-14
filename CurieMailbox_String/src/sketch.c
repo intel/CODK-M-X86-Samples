@@ -18,7 +18,6 @@
 #include <zephyr.h>
 #include <ipm.h>
 #include <ipm/ipm_quark_se.h>
-#include "arduino101_services/arduino101_services.h"
 
 #define SLEEP_TIME 100
 
