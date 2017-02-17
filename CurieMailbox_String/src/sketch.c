@@ -19,7 +19,7 @@
 #include <ipm.h>
 #include <ipm/ipm_quark_se.h>
 
-#define SLEEP_TIME 100
+#define SLEEP_TIME 1000
 
 /* Sending messages on all 8 channels */
 QUARK_SE_IPM_DEFINE(ipm0, 0, QUARK_SE_IPM_OUTBOUND);
