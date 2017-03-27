@@ -8,7 +8,10 @@
 #include "cdcacm_serial.h"
 #include "curie_shared_mem.h"
 #include "soc.h"
+#include "factory_data.h"
 #include "sketch.h"
+#include <string.h>
+#include <cdc_acm_config.h>
 
 void arduino101_services (void);
 

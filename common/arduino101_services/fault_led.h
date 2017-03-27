@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2017 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-#include <zephyr.h>
-#include "arduino/arduino.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void sketch (void *dummy1, void *dummy2, void *dummy3)
-{
-    // Required for Arduino-like APIs on x86
-    variantInit();
+void check_arc_error(void *dummy1, void *dummy2, void *dummy3);
 
-	//setup
+void blink_fault(int error_code);
 
-	//loop
-	while(1)
-	{
-		for(int i = 0; i < smc_availableForRead(); i++)
-		{
-			smc_write(smc_read() * 2);
-		}
-		k_yield();
-	}
+#ifdef __cplusplus
 }
+#endif
+
