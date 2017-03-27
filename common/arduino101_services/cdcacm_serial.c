@@ -2,13 +2,15 @@
 #include <device.h>
 #include <zephyr.h>
 #include <uart.h>
+#include <gpio.h>
 #include "soc.h"
 
 #include "soc_ctrl.h"
 #include "curie_shared_mem.h"
 
-#define RESET_BAUD 1200
-#define BAUDRATE_RESET_SLEEP 50
+#define RESET_BAUD              1200
+#define BAUDRATE_RESET_SLEEP    50
+#define TX_DELAY                40
 
 /* Make sure BUFFER_LENGTH is not bigger then shared ring buffers */
 #define BUFFER_LENGTH		128
@@ -24,6 +26,8 @@
 #define RSTC_WARM_RESET	(1 << 1)
 #define RSTC_COLD_RESET (1 << 3)
 
+#define TXRX_LED 12
+
 typedef enum {
 	ACM_RX_DISABLED,
 	ACM_RX_READY,
@@ -37,19 +41,18 @@ typedef enum {
 } acm_tx_states;
 
 struct device *dev;
+struct device *gpio_dev;
 bool usbSetupDone = false;
 bool enableReboot = false;
 
 // buffers
 static unsigned char data_buf[128];
-static uint8_t write_buffer[BUFFER_LENGTH*2];
 
 static volatile uint32_t acm_rx_state = ACM_RX_DISABLED;
 static volatile uint32_t acm_tx_state = ACM_TX_DISABLED;
 
 static volatile bool data_transmitted;
 static volatile bool data_arrived = false;
-
 
 
 static void interrupt_handler(struct device *dev)
@@ -86,26 +89,32 @@ static void write_data(struct device *dev, const char *buf, int len)
 	uart_fifo_fill(dev, (const uint8_t*)buf, len);
 	while (data_transmitted == false)
 	{
-		k_yield();
 	}
-	k_busy_wait(CDCACM_TX_DELAY); //allow enough time for the FIFO to be emptied
 	uart_irq_tx_disable(dev);
 }
 
 void cdc_acm_tx()
 {
+	uint32_t dtr = 0;
+	uint8_t write_buffer[BUFFER_LENGTH];
 	if (acm_tx_state == ACM_TX_READY) 
 	{
 		if(Tx_HEAD != Tx_TAIL)
 		{
-			int cnt = 0, index = Tx_TAIL;
-			for (; (index != Tx_HEAD) && (cnt < BUFFER_LENGTH);cnt++) 
+			int cnt = 0;			
+			for (; (Tx_TAIL != Tx_HEAD) && (cnt < BUFFER_LENGTH);cnt++)
 			{
-				write_buffer[cnt] = Tx_BUFF[index];
-				index = (index + 1) % SBS;
+				write_buffer[cnt] = Tx_BUFF[Tx_TAIL];
+				Tx_TAIL = (Tx_TAIL + 1)% SBS;
 			}
-			Tx_TAIL= (Tx_TAIL + cnt) % SBS;
-			write_data(dev, (const char*)write_buffer, cnt);
+			uart_line_ctrl_get(dev, LINE_CTRL_DTR, &dtr);
+			if(dtr)
+			{
+				gpio_pin_write(gpio_dev, TXRX_LED, 0);	//turn TXRX led on
+				write_data(dev, (const char*)write_buffer, cnt);
+				k_busy_wait(TX_DELAY * cnt);
+				gpio_pin_write(gpio_dev, TXRX_LED, 1);	//turn TXRX led off
+			}			
 		}
 		else
 		{
@@ -129,10 +138,12 @@ void cdc_acm_rx()
 	i=0;
 	while(bytes_read)
 	{
+		gpio_pin_write(gpio_dev, TXRX_LED, 0);	//turn TXRX led on
 		if (!curie_shared_data->cdc_acm_buffers_obj.device_open) 
 		{
 			// ARC is not ready to receive this data - discard it
 			bytes_read = 0;
+			gpio_pin_write(gpio_dev, TXRX_LED, 1);	//turn TXRX led off
 			break;
 		}
 		// Check room in Rx buffer
@@ -143,9 +154,10 @@ void cdc_acm_rx()
 			Rx_HEAD = new_head;
 			i++;
 			bytes_read--;
-		} else 
+		} 
+		else 
 		{
-
+			gpio_pin_write(gpio_dev, TXRX_LED, 1);	//turn TXRX led off
 			break;
 		}
 	}
@@ -182,19 +194,24 @@ void cdcacm_setup(void *dummy1, void *dummy2, void *dummy3)
 	
 	acm_tx_state = ACM_TX_READY;
 	acm_rx_state = ACM_RX_READY;
-	curie_shared_data->cdc_acm_buffers_obj.host_open = true;
 	
 	ret = uart_line_ctrl_set(dev, LINE_CTRL_DSR, 1);
 
 	enableReboot = true;
 	k_yield();
 
+	gpio_dev= device_get_binding("GPIO_0");
+	gpio_pin_configure(gpio_dev, TXRX_LED, (GPIO_DIR_OUT));
+	gpio_pin_write(gpio_dev, TXRX_LED, 1);
+    
 	/* Wait 1 sec for the host to do all settings */
 	k_busy_wait(1000000);
 
 	ret = uart_line_ctrl_get(dev, LINE_CTRL_BAUD_RATE, &baudrate);
 
 	uart_irq_callback_set(dev, interrupt_handler);
+
+	curie_shared_data->cdc_acm_buffers_obj.host_open = true;
 		
 	//reset head and tails values to 0
 	curie_shared_data->cdc_acm_shared_rx_buffer.head = 0;
