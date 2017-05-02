@@ -22,9 +22,9 @@
 /* size of stack area used by each thread */
 #define MAIN_STACKSIZE      2048
 #define SKETCH_STACKSIZE    2048
-#define CDCACM_STACKSIZE    384
-#define RESET_STACKSIZE     384
-#define USBSERIAL_STACKSIZE 384
+#define CDCACM_STACKSIZE    512
+#define RESET_STACKSIZE     512
+#define USBSERIAL_STACKSIZE 512
 
 /* scheduling priority used by each thread */
 #define PRIORITY 7
