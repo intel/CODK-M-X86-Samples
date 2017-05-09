@@ -47,6 +47,7 @@
 #endif
 
 #define PULL_UP 1
+#define PINMUX_NAME CONFIG_PINMUX_NAME
 
 struct device *gpio_dev;
 
@@ -57,7 +58,7 @@ void digitalInit()
 
 void pinMode(uint8_t pin, uint8_t mode)
 {
-	struct device *p_mux = device_get_binding((char*)"PINMUX_DEV");
+	struct device *p_mux = device_get_binding(PINMUX_NAME);
 	pinmux_pin_set(p_mux, zephyrDescription[pin].pinMux, zephyrDescription[pin].muxMode); //set to default gpio mux mode
 
 	if(zephyrDescription[pin].zephyrPin2 != INVALID) 

@@ -24,6 +24,8 @@
 #define PRINT           printk
 #endif
 
+#define PINMUX_NAME CONFIG_PINMUX_NAME
+
 
 
 #ifdef __cplusplus
@@ -63,7 +65,8 @@ void variantInit()
 {
 	analogInit();
 	digitalInit();
-	struct device *p_mux = device_get_binding((char*)"PINMUX_DEV");
+	
+	struct device *p_mux = device_get_binding(PINMUX_NAME);
 	for(int i = 0; i < NUM_DIGITAL_PINS; i++)
 	{
 		if(zephyrDescription[i].muxMode != INVALID)

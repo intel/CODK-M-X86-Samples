@@ -37,6 +37,9 @@
 #define PWM_PERIOD 	2040	//490 Hz
 #define HW_CLOCK_CYCLES_PER_USEC  (CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC / \
 				   USEC_PER_SEC)
+
+#define PWM_DRIVER CONFIG_PWM_QMSI_DEV_NAME
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,7 +54,7 @@ struct device *pwm_dev;
 
 void analogInit()
 {
-	pwm_dev = device_get_binding("PWM_0");
+	pwm_dev = device_get_binding(PWM_DRIVER);
 	
 	pwm_period[0] = PWM_PERIOD;
 	pwm_period[1] = PWM_PERIOD/2;
